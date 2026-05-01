@@ -1,0 +1,18 @@
+# UniMCP Development & Testing Requirements
+# Use this to set up your local development environment
+
+# Core library dependencies (installed with 'pip install -e .')
+mcp==1.27.0
+openai==2.33.0
+python-dotenv
+
+# For running the reference MCP server (reference/server.py)
+uvicorn
+starlette
+fastmcp
+
+# Optional: Testing & Development
+pytest
+pytest-asyncio
+black
+flake8
