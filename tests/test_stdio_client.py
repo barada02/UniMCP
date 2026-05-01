@@ -1,9 +1,12 @@
 import asyncio
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.unimcp.client import UniClient
 
 async def main():
     # Provide the path to the local server script
-    client = UniClient(endpoint="test_server.py")
+    client = UniClient(endpoint="tests/test_server.py")
     
     print("Connecting to local stdio server...")
     await client.connect()
