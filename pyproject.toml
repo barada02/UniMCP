@@ -26,3 +26,6 @@ dependencies = [
 [project.urls]
 "Homepage" = "https://github.com/barada02/UniMCP"
 "Bug Tracker" = "https://github.com/barada02/UniMCP/issues"
+
+[project.scripts]
+unimcp-chat = "unimcp.cli:main"
