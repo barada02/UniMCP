@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, AsyncGenerator, Union
 from openai import AsyncOpenAI
 import json
 import os
@@ -73,7 +73,12 @@ class UniLLM:
         if session:
             session.system_prompt = prompt
 
-    async def chat(self, user_input: str, session: Optional[Session] = None) -> str:
+    async def chat(
+        self, 
+        user_input: str, 
+        session: Optional[Session] = None,
+        stream: bool = False
+    ) -> Union[str, AsyncGenerator[str, None]]:
         """
         Sends a user message to the LLM and processes any required tool calls 
         from the MCP server before returning the final text response.
@@ -81,9 +86,121 @@ class UniLLM:
         Args:
             user_input: User's message
             session: Optional explicit session. If None, uses ephemeral in-memory session.
+            stream: If True, returns AsyncGenerator that yields text chunks. If False (default), returns full string.
         
         Returns:
-            LLM's final text response
+            If stream=False: LLM's final text response (str)
+            If stream=True: AsyncGenerator yielding text chunks
+        
+        Examples:
+            # Non-streaming (default)
+            response = await llm.chat("Hello")
+            print(response)
+            
+            # Streaming
+            async for chunk in await llm.chat("Hello", stream=True):
+                print(chunk, end="", flush=True)
+        """
+        if stream:
+            # Return an async generator
+            return self._chat_stream(user_input, session)
+        else:
+            # Original non-streaming behavior
+            return await self._chat_internal(user_input, session)
+    
+    async def _chat_stream(
+        self,
+        user_input: str,
+        session: Optional[Session] = None
+    ) -> AsyncGenerator[str, None]:
+        """
+        Internal streaming implementation. Yields text chunks as they arrive.
+        """
+        # Use provided session or ephemeral in-memory session
+        if session is None:
+            session = Session()  # Temporary session, will be GC'd
+        
+        target_messages = session.messages
+        target_messages.append({"role": "user", "content": user_input})
+        
+        mcp_tools = await self.mcp_client.get_tools()
+        available_openai_tools = self._convert_mcp_to_openai_tools(mcp_tools)
+        
+        while True:
+            chat_kwargs = {
+                "model": self.model_name,
+                "messages": target_messages,
+                "stream": True,  # Enable streaming
+            }
+            if available_openai_tools:
+                chat_kwargs["tools"] = available_openai_tools
+                chat_kwargs["tool_choice"] = "auto"
+            
+            # Stream the response
+            full_content = ""
+            has_tool_calls = False
+            tool_calls = []
+            
+            async with await self.client.chat.completions.create(**chat_kwargs) as stream:
+                async for chunk in stream:
+                    if chunk.choices[0].delta.content:
+                        full_content += chunk.choices[0].delta.content
+                        yield chunk.choices[0].delta.content
+                    
+                    # Check for tool calls in delta
+                    if chunk.choices[0].delta.tool_calls:
+                        has_tool_calls = True
+                        tool_calls.extend(chunk.choices[0].delta.tool_calls)
+            
+            # Build message dict
+            message_dict = {
+                "role": "assistant",
+                "content": full_content if full_content else None
+            }
+            
+            if has_tool_calls:
+                message_dict["tool_calls"] = [
+                    {
+                        "id": tc.id,
+                        "type": tc.type,
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments
+                        }
+                    }
+                    for tc in tool_calls
+                ]
+            
+            target_messages.append(message_dict)
+            
+            # If tool calls were made, execute them
+            if has_tool_calls:
+                for tool_call in tool_calls:
+                    tool_name = tool_call.function.name
+                    tool_args = json.loads(tool_call.function.arguments)
+                    
+                    # Execute tool via MCP client
+                    tool_result_str = await self.mcp_client.call_tool(tool_name, tool_args)
+                    
+                    # Feed the result back to the LLM
+                    target_messages.append({
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "name": tool_name,
+                        "content": tool_result_str
+                    })
+                # Continue loop to get final response
+            else:
+                # No more tool calls, we're done
+                break
+    
+    async def _chat_internal(
+        self,
+        user_input: str,
+        session: Optional[Session] = None
+    ) -> str:
+        """
+        Internal non-streaming implementation. Returns full response string.
         """
         # Use provided session or ephemeral in-memory session
         if session is None:
