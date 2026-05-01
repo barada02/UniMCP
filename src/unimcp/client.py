@@ -3,6 +3,14 @@ from typing import Optional, List, Dict, Any
 from mcp import ClientSession
 from contextlib import AsyncExitStack
 
+from .exceptions import (
+    ConnectionError,
+    NotConnectedError,
+    ToolNotFoundError,
+    ToolExecutionError
+)
+from .generator import ToolFunctionGenerator
+
 class UniClient:
     """
     A unified MCP Client that connects to an MCP server (SSE or Stdio)
@@ -24,35 +32,41 @@ class UniClient:
         """Connects to the MCP server."""
         self._exit_stack = AsyncExitStack()
         
-        if self.endpoint.startswith("http://") or self.endpoint.startswith("https://"):
-            from mcp.client.sse import sse_client
-            read_stream, write_stream = await self._exit_stack.enter_async_context(sse_client(url=self.endpoint))
-        else:
-            from mcp.client.stdio import stdio_client, StdioServerParameters
-            
-            cmd = self.command
-            arguments = self.args
-            
-            # Infer command if not explicitly provided
-            if not cmd:
-                if self.endpoint.endswith(".py"):
-                    cmd = "python"
-                    arguments = [self.endpoint] + self.args
-                elif self.endpoint.endswith(".js"):
-                    cmd = "node"
-                    arguments = [self.endpoint] + self.args
-                else:
-                    # Treat endpoint as the command executable itself
-                    cmd = self.endpoint
-                    
-            server_params = StdioServerParameters(
-                command=cmd,
-                args=arguments
-            )
-            read_stream, write_stream = await self._exit_stack.enter_async_context(stdio_client(server_params))
+        try:
+            if self.endpoint.startswith("http://") or self.endpoint.startswith("https://"):
+                from mcp.client.sse import sse_client
+                read_stream, write_stream = await self._exit_stack.enter_async_context(sse_client(url=self.endpoint))
+            else:
+                from mcp.client.stdio import stdio_client, StdioServerParameters
+                
+                cmd = self.command
+                arguments = self.args
+                
+                # Infer command if not explicitly provided
+                if not cmd:
+                    if self.endpoint.endswith(".py"):
+                        cmd = "python"
+                        arguments = [self.endpoint] + self.args
+                    elif self.endpoint.endswith(".js"):
+                        cmd = "node"
+                        arguments = [self.endpoint] + self.args
+                    else:
+                        # Treat endpoint as the command executable itself
+                        cmd = self.endpoint
+                        
+                server_params = StdioServerParameters(
+                    command=cmd,
+                    args=arguments
+                )
+                read_stream, write_stream = await self._exit_stack.enter_async_context(stdio_client(server_params))
 
-        self.session = await self._exit_stack.enter_async_context(ClientSession(read_stream, write_stream))
-        await self.session.initialize()
+            self.session = await self._exit_stack.enter_async_context(ClientSession(read_stream, write_stream))
+            await self.session.initialize()
+        except Exception as e:
+            # Clean up exit stack if connection fails during initialization
+            await self._exit_stack.aclose()
+            self._exit_stack = None
+            raise ConnectionError(f"Failed to connect to MCP server at '{self.endpoint}': {e}") from e
 
     async def disconnect(self):
         """Disconnects from the MCP server."""
@@ -71,23 +85,26 @@ class UniClient:
     async def get_tools(self) -> List[Any]:
         """Lists available tools from the MCP server."""
         if not self.session:
-            raise RuntimeError("Client not connected. Call connect() first.")
+            raise NotConnectedError("Client not connected. Call connect() first.")
         response = await self.session.list_tools()
         return response.tools
 
     async def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> str:
         """Executes a tool on the MCP server and returns the text result."""
         if not self.session:
-            raise RuntimeError("Client not connected. Call connect() first.")
+            raise NotConnectedError("Client not connected. Call connect() first.")
         
-        result = await self.session.call_tool(tool_name, arguments=arguments)
-        
-        # Read the response text from the server
-        tool_result_str = ""
-        for content in result.content:
-            if content.type == "text":
-                tool_result_str += content.text
-        return tool_result_str
+        try:
+            result = await self.session.call_tool(tool_name, arguments=arguments)
+            
+            # Read the response text from the server
+            tool_result_str = ""
+            for content in result.content:
+                if content.type == "text":
+                    tool_result_str += content.text
+            return tool_result_str
+        except Exception as e:
+            raise ToolExecutionError(f"Execution of tool '{tool_name}' failed: {e}") from e
 
     async def explore(self) -> Dict[str, List[str]]:
         """
@@ -95,7 +112,7 @@ class UniClient:
         prompts, and resources.
         """
         if not self.session:
-            raise RuntimeError("Client not connected. Call connect() first.")
+            raise NotConnectedError("Client not connected. Call connect() first.")
             
         exploration_data = {
             "tools": [],
@@ -133,7 +150,7 @@ class UniClient:
         Retrieves the complete details (schema, description, etc.) of a specific tool.
         """
         if not self.session:
-            raise RuntimeError("Client not connected. Call connect() first.")
+            raise NotConnectedError("Client not connected. Call connect() first.")
             
         tools_response = await self.session.list_tools()
         for tool in tools_response.tools:
@@ -143,7 +160,7 @@ class UniClient:
                     "description": tool.description,
                     "inputSchema": tool.inputSchema
                 }
-        raise ValueError(f"Tool '{tool_name}' not found on the server.")
+        raise ToolNotFoundError(f"Tool '{tool_name}' not found on the server.")
 
     async def load_tools(self) -> Any:
         """
@@ -151,24 +168,11 @@ class UniClient:
         MCP tool is a callable native Python method.
         """
         if not self.session:
-            raise RuntimeError("Client not connected. Call connect() first.")
+            raise NotConnectedError("Client not connected. Call connect() first.")
             
-        class DynamicToolset:
-            pass
-            
-        toolset = DynamicToolset()
         tools_response = await self.session.list_tools()
         
-        for tool in tools_response.tools:
-            # Closure to capture the tool name properly
-            def create_tool_method(t_name, t_desc):
-                async def native_tool_call(**kwargs):
-                    return await self.call_tool(t_name, kwargs)
-                
-                native_tool_call.__name__ = t_name
-                native_tool_call.__doc__ = t_desc
-                return native_tool_call
-                
-            setattr(toolset, tool.name, create_tool_method(tool.name, tool.description))
-            
+        # Delegate tool generation to the modular generator
+        generator = ToolFunctionGenerator(self)
+        toolset = await generator.generate(tools_response.tools)
         return toolset
