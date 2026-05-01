@@ -11,9 +11,13 @@ import asyncio
 import argparse
 import os
 from typing import Optional
+from dotenv import load_dotenv
 from .client import UniClient
 from .llm import UniLLM
 from .interactive import InteractiveChat
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def main():

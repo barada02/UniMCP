@@ -2,6 +2,11 @@
 UniMCP package - Connect to MCP servers and use them pythonically or with LLMs.
 """
 
+from dotenv import load_dotenv
+
+# Load environment variables from .env file automatically
+load_dotenv()
+
 from .client import UniClient
 from .llm import UniLLM
 from .session import Session
