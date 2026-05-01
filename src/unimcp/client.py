@@ -128,3 +128,47 @@ class UniClient:
             pass # Server might not support resources
             
         return exploration_data
+    async def get_tool_details(self, tool_name: str) -> Dict[str, Any]:
+        """
+        Retrieves the complete details (schema, description, etc.) of a specific tool.
+        """
+        if not self.session:
+            raise RuntimeError("Client not connected. Call connect() first.")
+            
+        tools_response = await self.session.list_tools()
+        for tool in tools_response.tools:
+            if tool.name == tool_name:
+                return {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "inputSchema": tool.inputSchema
+                }
+        raise ValueError(f"Tool '{tool_name}' not found on the server.")
+
+    async def load_tools(self) -> Any:
+        """
+        Dynamically generates and returns a Python object where each available 
+        MCP tool is a callable native Python method.
+        """
+        if not self.session:
+            raise RuntimeError("Client not connected. Call connect() first.")
+            
+        class DynamicToolset:
+            pass
+            
+        toolset = DynamicToolset()
+        tools_response = await self.session.list_tools()
+        
+        for tool in tools_response.tools:
+            # Closure to capture the tool name properly
+            def create_tool_method(t_name, t_desc):
+                async def native_tool_call(**kwargs):
+                    return await self.call_tool(t_name, kwargs)
+                
+                native_tool_call.__name__ = t_name
+                native_tool_call.__doc__ = t_desc
+                return native_tool_call
+                
+            setattr(toolset, tool.name, create_tool_method(tool.name, tool.description))
+            
+        return toolset
