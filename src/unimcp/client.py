@@ -88,3 +88,43 @@ class UniClient:
             if content.type == "text":
                 tool_result_str += content.text
         return tool_result_str
+
+    async def explore(self) -> Dict[str, List[str]]:
+        """
+        Explores the connected MCP server and returns the names of available tools, 
+        prompts, and resources.
+        """
+        if not self.session:
+            raise RuntimeError("Client not connected. Call connect() first.")
+            
+        exploration_data = {
+            "tools": [],
+            "prompts": [],
+            "resources": []
+        }
+        
+        # Get Tools
+        try:
+            tools_response = await self.session.list_tools()
+            if tools_response and hasattr(tools_response, 'tools'):
+                exploration_data["tools"] = [tool.name for tool in tools_response.tools]
+        except Exception as e:
+            print(f"Notice: Failed to fetch tools: {e}")
+            
+        # Get Prompts
+        try:
+            prompts_response = await self.session.list_prompts()
+            if prompts_response and hasattr(prompts_response, 'prompts'):
+                exploration_data["prompts"] = [prompt.name for prompt in prompts_response.prompts]
+        except Exception as e:
+            pass # Server might not support prompts
+            
+        # Get Resources
+        try:
+            resources_response = await self.session.list_resources()
+            if resources_response and hasattr(resources_response, 'resources'):
+                exploration_data["resources"] = [resource.name for resource in resources_response.resources]
+        except Exception as e:
+            pass # Server might not support resources
+            
+        return exploration_data

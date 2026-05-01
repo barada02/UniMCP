@@ -12,12 +12,16 @@ async def main():
     await client.connect()
     print("Connected successfully!")
     
-    print("\nAvailable tools:")
-    tools = await client.get_tools()
-    for tool in tools:
-        print(f" - {tool.name}: {tool.description}")
+    print("\nExploring server capabilities...")
+    exploration = await client.explore()
+    
+    print("\n--- Exploration Results ---")
+    print("Tools:", exploration.get("tools", []))
+    print("Prompts:", exploration.get("prompts", []))
+    print("Resources:", exploration.get("resources", []))
+    print("---------------------------\n")
         
-    print("\nCalling 'get_system_status'...")
+    print("Calling 'get_system_status'...")
     try:
         result = await client.call_tool("get_system_status", {})
         print("Result:", result)
