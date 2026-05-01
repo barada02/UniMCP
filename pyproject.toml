@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "unimcp"
+version = "0.1.0"
+description = "A short description of the unimcp package"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+authors = [
+  { name = "Your Name", email = "your.email@example.com" },
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    # Add your dependencies here
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourusername/unimcp"
+"Bug Tracker" = "https://github.com/yourusername/unimcp/issues"
