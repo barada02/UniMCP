@@ -1,0 +1,32 @@
+(venv) (base) PS C:\Users\barad\Desktop\projects\UniMCP> python sc.py
+Traceback (most recent call last):
+  File "C:\Users\barad\Desktop\projects\UniMCP\sc.py", line 19, in <module>
+    asyncio.run(main())
+    ~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\barad\anaconda3\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "C:\Users\barad\anaconda3\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\barad\anaconda3\Lib\asyncio\base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "C:\Users\barad\Desktop\projects\UniMCP\sc.py", line 16, in main
+    response = await llm.chat("hi can you save my friends name dinesh and his phone number is 9009876543 and his email id is dinesh@gmail.com ")        
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        
+  File "C:\Users\barad\Desktop\projects\UniMCP\src\unimcp\llm.py", line 73, in chat
+    response = await self.client.chat.completions.create(**chat_kwargs)     
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^     
+  File "C:\Users\barad\Desktop\projects\UniMCP\venv\Lib\site-packages\openai\resources\chat\completions\completions.py", line 2714, in create
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+    ...<49 lines>...
+    )
+    ^
+  File "C:\Users\barad\Desktop\projects\UniMCP\venv\Lib\site-packages\openai\_base_client.py", line 1913, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\barad\Desktop\projects\UniMCP\venv\Lib\site-packages\openai\_base_client.py", line 1698, in request
+    raise self._make_status_error_from_response(err.response) from None     
+openai.NotFoundError: Error code: 404 - [{'error': {'code': 404, 'message': 'models/gpt-4o is not found for API version v1main, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}]

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [
-  { name = "Chandan Kumar Barad", email = "[EMAIL_ADDRESS]" },
+  { name = "Chandan Kumar Barad", email = "chandanbarada2@gmail.com" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
