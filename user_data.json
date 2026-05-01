@@ -1,12 +1,15 @@
 {
     "contacts": {
-        "John Doe": {
-            "phone": "123-456-7890",
+        "Dinesh": {
+            "phone": "555-1234",
+            "email": ""
+        },
+        "Alice": {
+            "phone": "555-9999",
             "email": ""
         }
     },
     "user": {
-        "name": "Alex",
-        "email": "alex@example.com"
+        "email": "Chandan@example.com"
     }
 }

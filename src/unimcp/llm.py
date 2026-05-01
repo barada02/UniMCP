@@ -2,6 +2,7 @@ from typing import Optional, List, Dict, Any
 from openai import AsyncOpenAI
 import json
 import os
+from .session import Session
 
 class UniLLM:
     """
@@ -54,19 +55,42 @@ class UniLLM:
             })
         return openai_tools
 
-    def set_system_prompt(self, prompt: str):
-        """Sets the system prompt for the LLM."""
-        if self.messages and self.messages[0]["role"] == "system":
-            self.messages[0]["content"] = prompt
+    def set_system_prompt(self, prompt: str, session: Optional[Session] = None):
+        """
+        Sets the system prompt for the LLM.
+        
+        Args:
+            prompt: System prompt text
+            session: Optional session to set prompt on. If None, sets on default ephemeral session.
+        """
+        target_messages = session.messages if session else self.messages
+        
+        if target_messages and target_messages[0]["role"] == "system":
+            target_messages[0]["content"] = prompt
         else:
-            self.messages.insert(0, {"role": "system", "content": prompt})
+            target_messages.insert(0, {"role": "system", "content": prompt})
+        
+        if session:
+            session.system_prompt = prompt
 
-    async def chat(self, user_input: str) -> str:
+    async def chat(self, user_input: str, session: Optional[Session] = None) -> str:
         """
         Sends a user message to the LLM and processes any required tool calls 
         from the MCP server before returning the final text response.
+        
+        Args:
+            user_input: User's message
+            session: Optional explicit session. If None, uses ephemeral in-memory session.
+        
+        Returns:
+            LLM's final text response
         """
-        self.messages.append({"role": "user", "content": user_input})
+        # Use provided session or ephemeral in-memory session
+        if session is None:
+            session = Session()  # Temporary session, will be GC'd
+        
+        target_messages = session.messages
+        target_messages.append({"role": "user", "content": user_input})
         
         mcp_tools = await self.mcp_client.get_tools()
         available_openai_tools = self._convert_mcp_to_openai_tools(mcp_tools)
@@ -74,7 +98,7 @@ class UniLLM:
         while True:
             chat_kwargs = {
                 "model": self.model_name,
-                "messages": self.messages,
+                "messages": target_messages,
             }
             if available_openai_tools:
                 chat_kwargs["tools"] = available_openai_tools
@@ -83,8 +107,28 @@ class UniLLM:
             response = await self.client.chat.completions.create(**chat_kwargs)
             response_message = response.choices[0].message
             
+            # Convert OpenAI message object to JSON-serializable dict
+            message_dict = {
+                "role": response_message.role,
+                "content": response_message.content
+            }
+            
+            # Add tool_calls if present
+            if response_message.tool_calls:
+                message_dict["tool_calls"] = [
+                    {
+                        "id": tc.id,
+                        "type": tc.type,
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments
+                        }
+                    }
+                    for tc in response_message.tool_calls
+                ]
+            
             # Append the assistant's message to the history
-            self.messages.append(response_message)
+            target_messages.append(message_dict)
             
             # If the LLM decides to call a tool (or multiple tools)
             if response_message.tool_calls:
@@ -96,7 +140,7 @@ class UniLLM:
                     tool_result_str = await self.mcp_client.call_tool(tool_name, tool_args)
                     
                     # Feed the result back to the LLM
-                    self.messages.append({
+                    target_messages.append({
                         "role": "tool",
                         "tool_call_id": tool_call.id,
                         "name": tool_name,
@@ -105,3 +149,49 @@ class UniLLM:
                 # After resolving tools, loop to let the LLM generate a final text response
             else:
                 return response_message.content
+    
+    def create_session(
+        self,
+        name: Optional[str] = None,
+        system_prompt: Optional[str] = None,
+        auto_save: bool = False
+    ) -> Session:
+        """
+        Create a new persistent or auto-save session.
+        
+        Args:
+            name: Optional name for the session
+            system_prompt: Optional system prompt for this session
+            auto_save: If True, saves state to memory (not disk) after each chat
+        
+        Returns:
+            Session object
+        
+        Example:
+            session = llm.create_session(name="support_ticket_123")
+            response = await llm.chat("How can I help?", session=session)
+            await session.save("conversations/123.json")
+        """
+        session = Session(
+            name=name,
+            system_prompt=system_prompt,
+            auto_save=auto_save
+        )
+        return session
+    
+    @staticmethod
+    async def load_session(filepath: str) -> Session:
+        """
+        Load a previously saved session.
+        
+        Args:
+            filepath: Path to the saved session file
+        
+        Returns:
+            Loaded Session object
+        
+        Example:
+            session = await UniLLM.load_session("conversations/123.json")
+            response = await llm.chat("Continue...", session=session)
+        """
+        return await Session.load(filepath)

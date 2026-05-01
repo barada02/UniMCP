@@ -1,0 +1,124 @@
+{
+  "name": "support_conversation_001",
+  "system_prompt": null,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful support assistant."
+    },
+    {
+      "role": "user",
+      "content": "Get my system status"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-12385871127513274044",
+          "type": "function",
+          "function": {
+            "name": "get_system_status",
+            "arguments": "{}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-12385871127513274044",
+      "name": "get_system_status",
+      "content": "System: Windows 11\nCurrent Time: 2026-05-01 18:12:49\nStatus: All systems operational."
+    },
+    {
+      "role": "assistant",
+      "content": "My system is Windows 11 and the current time is 18:12:49 on 2026-05-01. All systems are operational. \n"
+    },
+    {
+      "role": "user",
+      "content": "Save my email as Chandan@example.com"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-15270038970437086700",
+          "type": "function",
+          "function": {
+            "name": "save_user_detail",
+            "arguments": "{\"value\":\"Chandan@example.com\",\"key\":\"email\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-15270038970437086700",
+      "name": "save_user_detail",
+      "content": "Successfully saved user detail: email = Chandan@example.com"
+    },
+    {
+      "role": "assistant",
+      "content": "I have saved your email as Chandan@example.com."
+    },
+    {
+      "role": "user",
+      "content": "Show me all saved data"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-10187922995504889591",
+          "type": "function",
+          "function": {
+            "name": "get_all_data",
+            "arguments": "{}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-10187922995504889591",
+      "name": "get_all_data",
+      "content": "{\n  \"contacts\": {\n    \"Dinesh\": {\n      \"phone\": \"555-1234\",\n      \"email\": \"\"\n    }\n  },\n  \"user\": {\n    \"email\": \"Chandan@example.com\"\n  }\n}"
+    },
+    {
+      "role": "assistant",
+      "content": "Here is all the saved data:\n\n**User Data:**\n*   Email: Chandan@example.com\n\n**Contacts:**\n*   **Dinesh:**\n    *   Phone: 555-1234"
+    },
+    {
+      "role": "user",
+      "content": "What data do you have about me?"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-6006705286375563683",
+          "type": "function",
+          "function": {
+            "name": "get_all_data",
+            "arguments": "{}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-6006705286375563683",
+      "name": "get_all_data",
+      "content": "{\n  \"contacts\": {\n    \"Dinesh\": {\n      \"phone\": \"555-1234\",\n      \"email\": \"\"\n    }\n  },\n  \"user\": {\n    \"email\": \"Chandan@example.com\"\n  }\n}"
+    },
+    {
+      "role": "assistant",
+      "content": "I have your email saved as Chandan@example.com."
+    }
+  ],
+  "created_at": "2026-05-01T18:12:47.307596",
+  "updated_at": "2026-05-01T18:12:59.977830"
+}
