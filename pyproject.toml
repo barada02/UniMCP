@@ -18,8 +18,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "mcp",
-    "openai>=1.0.0",
+    "mcp==1.27.0",
+    "openai==2.33.0",
     "python-dotenv"
 ]
 
