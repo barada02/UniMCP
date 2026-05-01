@@ -1,3 +1,12 @@
+```text
+ _   _       _ __  __  ____ ____ 
+| | | | ___ (_)  \/  |/ ___|  _ \
+| | | |/ _ \| | |\/| | |   | |_) |
+| |_| | | | | | |  | | |___|  __/ 
+ \___/|_| |_|_|_|  |_|\____|_|    
+  Universal MCP Client
+```
+
 # UniMCP
 
 A simple client library to connect to any MCP server and interact with tools seamlessly via code or through an LLM.
@@ -13,6 +22,7 @@ pip install unimcp
 ## Features
 - **Simple MCP Client**: Connect to any MCP server, list available tools, and call them directly with just a few lines of Python.
 - **LLM Integration**: Built-in wrapper to hook your MCP server tools directly into OpenAI (or any OpenAI-compatible API), enabling an LLM agent out-of-the-box.
+- **Session Management**: Automatically persist and resume multi-turn conversations with context awareness.
 
 ## Usage
 
@@ -133,6 +143,42 @@ async def main():
         
         response = await llm.chat("What can you do?")
         print("AI:", response)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### 3. Session Management & Persistent Conversations
+
+By default, `llm.chat()` creates a temporary in-memory session. If you want to persist conversations, export transcripts, or save context across restarts, use explicit Sessions.
+
+```python
+import asyncio
+from unimcp import UniClient, UniLLM, Session
+
+async def main():
+    async with UniClient("http://localhost:8000/sse") as client:
+        llm = UniLLM(client)
+        
+        # 1. Create a persistent session
+        session = llm.create_session(
+            name="support_ticket_123",
+            system_prompt="You are a helpful assistant."
+        )
+        
+        # 2. Chat with context using the session
+        response1 = await llm.chat("Save contact: Alice, phone 555-1234", session=session)
+        response2 = await llm.chat("Who are my saved contacts?", session=session)
+        
+        # 3. Save the conversation to disk
+        await session.save("sessions/ticket_123.json")
+        
+        # 4. Later, load it back and continue
+        loaded_session = await UniLLM.load_session("sessions/ticket_123.json")
+        response3 = await llm.chat("Add Bob to my contacts too", session=loaded_session)
+        
+        # You can also export the conversation transcript
+        print(loaded_session.export_transcript())
 
 if __name__ == "__main__":
     asyncio.run(main())
