@@ -97,6 +97,14 @@ class UniClient:
         try:
             result = await self.session.call_tool(tool_name, arguments=arguments)
             
+            if result.isError:
+                # Read the error text from the server
+                error_msg = ""
+                for content in result.content:
+                    if content.type == "text":
+                        error_msg += content.text
+                raise ToolExecutionError(f"Server returned error for tool '{tool_name}': {error_msg}")
+
             # Read the response text from the server
             tool_result_str = ""
             for content in result.content:
