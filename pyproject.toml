@@ -5,12 +5,12 @@ build-backend = "hatchling.build"
 [project]
 name = "unimcp"
 version = "0.1.0"
-description = "A short description of the unimcp package"
+description = "A simple client library to connect to any MCP server and interact with LLMs."
 readme = "README.md"
 requires-python = ">=3.8"
 license = { text = "MIT" }
 authors = [
-  { name = "Your Name", email = "your.email@example.com" },
+  { name = "Chandan Kumar Barad", email = "chandanbarada2@gmail.com" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -18,9 +18,11 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    # Add your dependencies here
+    "mcp",
+    "openai>=1.0.0",
+    "python-dotenv"
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/unimcp"
-"Bug Tracker" = "https://github.com/yourusername/unimcp/issues"
+"Homepage" = "https://github.com/barada02/UniMCP"
+"Bug Tracker" = "https://github.com/barada02/UniMCP/issues"
