@@ -10,5 +10,5 @@ PROVIDER_BASE_URLS = {
     "vllm": "http://localhost:8000/v1",
     "lmstudio": "http://localhost:1234/v1",
     "xai": "https://api.x.ai/v1",
-    "gemini": "https://generativelanguage.googleapis.com/v1beta"
+    "gemini": "https://generativelanguage.googleapis.com/v1beta/openai/"
 }
