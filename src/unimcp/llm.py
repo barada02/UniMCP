@@ -13,8 +13,11 @@ class UniLLM:
         mcp_client,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
-        model_name: Optional[str] = None
+        model_name: Optional[str] = None,
+        provider: Optional[str] = None
     ):
+        from .constants import PROVIDER_BASE_URLS
+        
         self.mcp_client = mcp_client
         self.messages: List[Dict[str, Any]] = []
         
@@ -25,6 +28,13 @@ class UniLLM:
             kwargs["api_key"] = final_api_key
             
         final_base_url = base_url or os.getenv("OPENAI_BASE_URL")
+        
+        # If no explicit base_url, but a provider is given, look it up in constants
+        if not final_base_url and provider:
+            provider_key = provider.lower()
+            if provider_key in PROVIDER_BASE_URLS:
+                final_base_url = PROVIDER_BASE_URLS[provider_key]
+                
         if final_base_url:
             kwargs["base_url"] = final_base_url
             
