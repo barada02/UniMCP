@@ -47,8 +47,17 @@ class InteractiveChat:
         User can type queries and see streamed AI responses.
         Type one of the exit commands to exit.
         """
+        ascii_art = r"""
+ _   _       _ __  __  ____ ____ 
+| | | | ___ (_)  \/  |/ ___|  _ \
+| | | |/ _ \| | |\/| | |   | |_) |
+| |_| | | | | | |  | | |___|  __/ 
+ \___/|_| |_|_|_|  |_|\____|_|    
+  Universal MCP Client v0.3.0
+        """
+        
         print("\n" + "="*60)
-        print("Interactive Chat (Streaming Enabled)")
+        print(ascii_art)
         print("="*60)
         print(f"System: {self.system_prompt}")
         print(f"Type one of {self.exit_commands} to exit.\n")

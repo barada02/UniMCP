@@ -1,4 +1,5 @@
 
+<div align="center">
 
 ```text
  _   _       _ __  __  ____ ____ 
@@ -6,9 +7,10 @@
 | | | |/ _ \| | |\/| | |   | |_) |
 | |_| | | | | | |  | | |___|  __/ 
  \___/|_| |_|_|_|  |_|\____|_|    
-      Universal MCP Client
+  Universal MCP Client
 ```
 
+</div>
 
 # UniMCP
 
