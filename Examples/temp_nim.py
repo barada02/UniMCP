@@ -3,16 +3,17 @@ import requests, base64
 
 invoke_url = "https://integrate.api.nvidia.com/v1/chat/completions"
 stream = False
-
+import os
+from dotenv import load_dotenv
 
 headers = {
-  "Authorization": "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",
+  "Authorization": f"Bearer {os.getenv('NIM_API_KEY')}",
   "Accept": "text/event-stream" if stream else "application/json"
 }
 
 payload = {
   "model": "meta/llama-4-maverick-17b-128e-instruct",
-  "messages": [{"role":"user","content":""}],
+  "messages": [{"role":"user","content":"i need help with my code, can you assist?"}],
   "max_tokens": 512,
   "temperature": 1.00,
   "top_p": 1.00,
