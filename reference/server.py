@@ -69,7 +69,7 @@ if __name__ == "__main__":
     print("Press CTRL+C to close.")
     
     try:
-        mcp.run(transport="sse")
+        mcp.run()
     except KeyboardInterrupt:
         print("\nShutting down server gracefully...")
         sys.exit(0)
