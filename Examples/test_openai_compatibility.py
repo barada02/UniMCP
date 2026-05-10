@@ -9,12 +9,12 @@ load_dotenv()
 async def main():
     # We use the OpenAI client but point it to the NVIDIA base URL.
     # This demonstrates that the NVIDIA API is OpenAI-compatible.
-    api_key = os.getenv("NIM_API_KEY")  # Ensure
-    base_url = "https://integrate.api.nvidia.com/v1/"
-    model_name = "meta/llama-4-maverick-17b-128e-instruct"
+    api_key = os.getenv("GEMINI_API_KEY")  # Ensure
+    base_url = "https://generativelanguage.googleapis.com/v1beta"
+    model_name = "gemini-2.5-flash"
 
     if not api_key:
-        print("Error: NIM_API key not found in .env file.")
+        print("Error: GEMINI_API key not found in .env file.")
         return
 
     print(f"Initializing OpenAI client with NVIDIA endpoint...")

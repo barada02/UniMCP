@@ -1,0 +1,82 @@
+{
+  "name": "DemoSession",
+  "system_prompt": "You are a helpful personal assistant with access to system notes.",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful personal assistant with access to system notes."
+    },
+    {
+      "role": "user",
+      "content": "What is the current system status and what is my favorite color?"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-9291495613780000829",
+          "type": "function",
+          "function": {
+            "name": "get_system_status",
+            "arguments": "{}"
+          }
+        },
+        {
+          "id": "function-call-9291495613780002010",
+          "type": "function",
+          "function": {
+            "name": "get_all_data",
+            "arguments": "{}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-9291495613780000829",
+      "name": "get_system_status",
+      "content": "System: Windows 11\nCurrent Time: 2026-05-10 15:42:35\nStatus: All systems operational."
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-9291495613780002010",
+      "name": "get_all_data",
+      "content": "{\n  \"user\": {\n    \"favorite_color\": \"Blue\"\n  },\n  \"contacts\": {\n    \"Alice\": {\n      \"phone\": \"123-456-7890\",\n      \"email\": \"\"\n    }\n  }\n}"
+    },
+    {
+      "role": "assistant",
+      "content": "The current system status is: System: Windows 11, Current Time: 2026-05-10 15:42:35, Status: All systems operational. Your favorite color is Blue.\n"
+    },
+    {
+      "role": "user",
+      "content": "Save a new contact named Alice with phone 123-456-7890."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-7188283162030454788",
+          "type": "function",
+          "function": {
+            "name": "save_contact",
+            "arguments": "{\"name\":\"Alice\",\"phone\":\"123-456-7890\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-7188283162030454788",
+      "name": "save_contact",
+      "content": "Contact 'Alice' saved successfully."
+    },
+    {
+      "role": "assistant",
+      "content": "I have saved a new contact named Alice with the phone number 123-456-7890."
+    }
+  ],
+  "created_at": "2026-05-10T15:42:33.112350",
+  "updated_at": "2026-05-10T15:42:41.225980"
+}
