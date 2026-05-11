@@ -12,7 +12,7 @@ async def main():
     # We point to the server.py file in the reference directory.
     # UniClient will automatically infer the 'python' command to run it.
     server_path = "../reference/server.py"
-    client = UniClient(endpoint=server_path)
+    client = UniClient()
 
     try:
         print(f"Connecting to MCP server at {server_path}...")

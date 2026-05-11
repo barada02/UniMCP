@@ -24,22 +24,22 @@ class UniLLM:
         
         kwargs = {}
         # Priority: arguments > environment variables
-        final_api_key = api_key or os.getenv("OPENAI_API_KEY")
+        final_api_key = api_key or os.getenv("LLM_API_KEY")
         if final_api_key:
             kwargs["api_key"] = final_api_key
-            
-        final_base_url = base_url or os.getenv("OPENAI_BASE_URL")
-        
+
+        final_base_url = base_url or os.getenv("LLM_BASE_URL")
+
         # If no explicit base_url, but a provider is given, look it up in constants
         if not final_base_url and provider:
             provider_key = provider.lower()
             if provider_key in PROVIDER_BASE_URLS:
                 final_base_url = PROVIDER_BASE_URLS[provider_key]
-                
+
         if final_base_url:
             kwargs["base_url"] = final_base_url
-            
-        self.model_name = model_name or os.getenv("OPENAI_MODEL", "gpt-4o")
+
+        self.model_name = model_name or os.getenv("LLM_MODEL_NAME", "gpt-4o")
         self.client = AsyncOpenAI(**kwargs)
 
     def _convert_mcp_to_openai_tools(self, mcp_tools) -> list:

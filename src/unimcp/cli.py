@@ -43,23 +43,23 @@ Examples:
     
     parser.add_argument(
         "--url",
-        default="http://localhost:8000/sse",
-        help="MCP server URL (default: http://localhost:8000/sse)"
+        default=None,
+        help="MCP server URL or file path (default: MCP_SERVER env var)"
     )
     parser.add_argument(
         "--model",
         default=None,
-        help="LLM model name (overrides OPENAI_MODEL env var)"
+        help="LLM model name (overrides LLM_MODEL_NAME env var)"
     )
     parser.add_argument(
         "--api-key",
         default=None,
-        help="API key (overrides OPENAI_API_KEY env var)"
+        help="API key (overrides LLM_API_KEY env var)"
     )
     parser.add_argument(
         "--base-url",
         default=None,
-        help="API base URL (overrides OPENAI_BASE_URL env var)"
+        help="API base URL (overrides LLM_BASE_URL env var)"
     )
     parser.add_argument(
         "--provider",
@@ -81,12 +81,20 @@ Examples:
 async def _async_main(args):
     """Async implementation of CLI."""
     try:
-        # Connect to MCP server
-        print(f"Connecting to MCP server at {args.url}...")
-        async with UniClient(args.url) as client:
+        # Determine the server endpoint: flag > env var
+        import os
+        url = args.url or os.getenv("MCP_SERVER")
+
+        if not url:
+            print("\nError: No MCP server endpoint provided.")
+            print("Please provide one via --url or set the MCP_SERVER environment variable in your .env file.\n")
+            return
+
+        print(f"Connecting to MCP server at {url}...")
+        async with UniClient(url) as client:
             # Create LLM with provided args
             llm_kwargs = {"mcp_client": client}
-            
+
             if args.api_key:
                 llm_kwargs["api_key"] = args.api_key
             if args.model:
@@ -95,13 +103,13 @@ async def _async_main(args):
                 llm_kwargs["base_url"] = args.base_url
             if args.provider:
                 llm_kwargs["provider"] = args.provider
-            
+
             llm = UniLLM(**llm_kwargs)
-            
+
             # Start interactive chat
             system_prompt = args.system_prompt or "You are a helpful assistant with access to tools."
             await InteractiveChat(llm, system_prompt=system_prompt).run()
-            
+
     except KeyboardInterrupt:
         print("\n\nInterrupted by user.")
     except Exception as e:
