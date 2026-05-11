@@ -117,10 +117,25 @@ async def _async_main(args):
         else:
             print(f"Hint: Ensure the local server script at {url} is executable and the process is running.")
         return
-    except KeyboardInterrupt:
-        print("\n\nInterrupted by user.")
     except Exception as e:
+        # Handle ExceptionGroups (Python 3.11+) and wrapped ConnectionErrors
+        error_msg = str(e)
+
+        if "ConnectionError" in error_msg or "ConnectError" in error_msg:
+            print(f"\n❌ Connection Error: {error_msg}")
+            if "http" in (url or ""):
+                print(f"Hint: Ensure your remote MCP server is running and accessible at {url}")
+            else:
+                print(f"Hint: Ensure the local server script at {url} is executable and the process is running.")
+            return
+
+        if isinstance(e, KeyboardInterrupt):
+            print("\n\nInterrupted by user.")
+            return
+
         print(f"\nUnexpected Error: {e}")
+        # We only raise if it's truly an unexpected system error,
+        # otherwise we want to keep the CLI clean.
         raise
 
 

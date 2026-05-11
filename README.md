@@ -29,4 +29,34 @@ A simple, Python-native client library to connect to any Model Context Protocol 
 pip install unimcp
 ```
 
+## 🚀 Interactive CLI
+
+The CLI provides a quick way to chat with your MCP server without writing any code.
+
+### Quick Start
+Run the chat command from your terminal:
+```bash
+unimcp-chat
+```
+
+### Configuration
+The CLI uses environment variables from your `.env` file by default. To make it work, add these to your `.env`:
+- `MCP_SERVER`: The endpoint of your server (e.g., `http://localhost:8000/sse` or `reference/server.py`).
+- `LLM_API_KEY`: Your LLM provider API key.
+- `LLM_BASE_URL`: The API base URL (e.g., for NVIDIA NIM or Gemini).
+- `LLM_MODEL_NAME`: The specific model you wish to use.
+
+### CLI Options
+You can override environment variables using flags:
+- `--url <url>`: Override the server endpoint.
+- `--api-key <key>`: Override the API key.
+- `--base-url <url>`: Override the LLM base URL.
+- `--model <name>`: Override the model name.
+- `--system-prompt "text"`: Set a custom system instruction.
+
+**Example:**
+```bash
+unimcp-chat --url http://localhost:8000/sse --model meta/llama-3.1-70b --api-key sk-123...
+```
+
 ---
