@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "unimcp"
-version = "0.5.0"
+version = "0.6.0"
 description = "A simple client library to connect to any MCP server and interact with or without LLMs."
 readme = "README.md"
 requires-python = ">=3.8"

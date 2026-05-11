@@ -1,0 +1,16 @@
+{
+    "contacts": {
+        "dinesh": {
+            "phone": "8975689412",
+            "email": ""
+        },
+        "Sneha": {
+            "phone": "8956231452",
+            "email": "sneha25@gmail.com"
+        },
+        "Sanjay": {
+            "phone": "",
+            "email": "sanjay23@gmail.com"
+        }
+    }
+}

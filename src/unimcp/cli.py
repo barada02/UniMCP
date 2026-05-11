@@ -110,10 +110,17 @@ async def _async_main(args):
             system_prompt = args.system_prompt or "You are a helpful assistant with access to tools."
             await InteractiveChat(llm, system_prompt=system_prompt).run()
 
+    except ConnectionError as e:
+        print(f"\n❌ Connection Error: {e}")
+        if "http" in (url or ""):
+            print(f"Hint: Ensure your remote MCP server is running and accessible at {url}")
+        else:
+            print(f"Hint: Ensure the local server script at {url} is executable and the process is running.")
+        return
     except KeyboardInterrupt:
         print("\n\nInterrupted by user.")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"\nUnexpected Error: {e}")
         raise
 
 
