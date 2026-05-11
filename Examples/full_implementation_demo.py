@@ -11,7 +11,7 @@ async def main():
     # --- STEP 1: Initialize the MCP Client ---
     # We point to the server.py file in the reference directory.
     # UniClient will automatically infer the 'python' command to run it.
-    server_path = "../reference/server.py"
+    
     client = UniClient()
 
     try:
