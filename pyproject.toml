@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "unimcp"
-version = "0.7.0"
+version = "0.8.0"
 description = "A simple client library to connect to any MCP server and interact with or without LLMs."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -20,7 +20,8 @@ classifiers = [
 dependencies = [
     "mcp==1.27.0",
     "openai==2.33.0",
-    "python-dotenv"
+    "python-dotenv",
+    "streamlit"
 ]
 
 [project.urls]
@@ -29,3 +30,4 @@ dependencies = [
 
 [project.scripts]
 unimcp-chat = "unimcp.cli:main"
+unimcp-dashboard = "unimcp.dashboard:main"
