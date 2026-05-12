@@ -16,13 +16,14 @@ class UniClient:
     A unified MCP Client that connects to an MCP server (SSE or Stdio)
     and allows execution of tools.
     """
-    def __init__(self, endpoint: str, command: Optional[str] = None, args: Optional[List[str]] = None):
+    def __init__(self, endpoint: Optional[str] = None, command: Optional[str] = None, args: Optional[List[str]] = None):
         """
         :param endpoint: A URL (http://...) for remote SSE, or a file path (e.g., 'server.py') for local Stdio.
         :param command: Explicit command to run for Stdio (e.g., 'python'). If None, inferred from endpoint.
         :param args: Additional arguments for the Stdio command.
         """
-        self.endpoint = endpoint
+        import os
+        self.endpoint = endpoint or os.getenv("MCP_SERVER")
         self.command = command
         self.args = args or []
         self.session: Optional[ClientSession] = None

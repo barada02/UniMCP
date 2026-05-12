@@ -1,0 +1,68 @@
+{
+  "name": "DemoSession",
+  "system_prompt": "You are a helpful personal assistant with access to system notes.",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful personal assistant with access to system notes."
+    },
+    {
+      "role": "user",
+      "content": "What is the current system status and what is my favorite color?"
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-11896966384863787316",
+          "type": "function",
+          "function": {
+            "name": "get_system_status",
+            "arguments": "{}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-11896966384863787316",
+      "name": "get_system_status",
+      "content": "System: Windows 11\nCurrent Time: 2026-05-11 13:01:34\nStatus: All systems operational."
+    },
+    {
+      "role": "assistant",
+      "content": "I can tell you that the system is operational, running Windows 11, and the current time is 2026-05-11 13:01:34. However, I don't know what your favorite color is. Is there anything else I can help you with?"
+    },
+    {
+      "role": "user",
+      "content": "Save a new contact named Alice with phone 123-456-7890."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "function-call-4738733203380544905",
+          "type": "function",
+          "function": {
+            "name": "save_contact",
+            "arguments": "{\"name\":\"Alice\",\"phone\":\"123-456-7890\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "function-call-4738733203380544905",
+      "name": "save_contact",
+      "content": "Contact 'Alice' saved successfully."
+    },
+    {
+      "role": "assistant",
+      "content": "I have successfully saved Alice as a new contact with the phone number 123-456-7890."
+    }
+  ],
+  "created_at": "2026-05-11T13:01:30.834180",
+  "updated_at": "2026-05-11T13:01:38.705021"
+}
